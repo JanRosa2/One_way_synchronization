@@ -37,26 +37,32 @@ def make_content_list(path_folder):
 This function replaces a target-folder file with a source-folder file.
 """
 def replace_file(source_path, target_path):
-    try:
-        os.replace(source_path, target_path)
-        message = f"{datetime.now()}: Replaced file '{target_path.name}'."
-        print(message)
-        return message
-    except OSError as exc:
-        print(exc)
+    if isinstance(source_path, pathlib.Path) and isinstance(target_path, pathlib.Path):
+        try:
+            os.replace(source_path, target_path)
+            message = f"{datetime.now()}: Replaced file '{target_path.name}'."
+            print(message)
+            return message
+        except OSError:
+            raise
+    else:
+        raise TypeError("Arguments have to be Path objects.")
 
 
 """
 This funtion deletes a file from the given path.
 """
 def delete_file(target_path):
-    try:
-        os.remove(target_path)
-        message = f"{datetime.now()}: Removed file '{target_path.name}' from '{target_path}'."
-        print(message)
-        return message
-    except OSError as exc:
-        print(exc)
+    if isinstance(target_path, pathlib.Path):
+        try:
+            os.remove(target_path)
+            message = f"{datetime.now()}: Removed file '{target_path.name}' from '{target_path}'."
+            print(message)
+            return message
+        except OSError:
+            raise
+    else:
+        raise TypeError("Argument has to be Path object.")
 
 
 """
@@ -71,34 +77,43 @@ def delete_folder(target_path):
             return message
         except IOError as e:
             print(e)
+            raise
     else:
-        raise TypeError(f"Argument has to be Path object.")
+        raise TypeError("Argument has to be Path object.")
 
 
 """
 This function copies a file from a source-folder to a target-folder.
 """
 def copy_file(source_path, target_path):
-    try:
-        shutil.copy2(source_path, target_path)
-        message = f"{datetime.now()}: Copied file '{source_path}' -> '{target_path}'."
-        print(message)
-        return message
-    except IOError as e:
-        print(e)
+    if isinstance(target_path, pathlib.Path):
+        try:
+            shutil.copy2(source_path, target_path)
+            message = f"{datetime.now()}: Copied file '{source_path}' -> '{target_path}'."
+            print(message)
+            return message
+        except IOError as e:
+            print(e)
+            raise
+    else:
+        raise TypeError("Arguments have to be Path objects.")
 
 
 """
 This function copies a folder from a source-folder to a target-folder.
 """
 def copy_folder(source_path, target_path):
-    try:
-        shutil.copytree(source_path, target_path)
-        message = f"{datetime.now()}: Copied folder '{source_path}' -> '{target_path}'."
-        print(message)
-        return message
-    except IOError as e:
-        print(e)
+    if isinstance(source_path, pathlib.Path) and isinstance(target_path, pathlib.Path):
+        try:
+            shutil.copytree(source_path, target_path)
+            message = f"{datetime.now()}: Copied folder '{source_path}' -> '{target_path}'."
+            print(message)
+            return message
+        except IOError as e:
+            print(e)
+            raise
+    else:
+        raise TypeError("Arguments have to be Path objects.")
 
 
 """
@@ -108,7 +123,7 @@ def is_file(content):
     if isinstance(content, os.DirEntry):
         return os.DirEntry.is_file(content)
     else:
-        raise TypeError(f"Argument has to be DirEntry object.")
+        raise TypeError("Argument has to be DirEntry object.")
 
 
 """
@@ -165,7 +180,7 @@ This function deletes files from the target-folder which are not in the source f
 def delete_files_not_in_source(target_content_list, source_content_list, target_folder_path):
     for target_content in target_content_list:
         if target_content not in source_content_list:
-            content = pathlib.Path(f"{target_folder_path}\\{target_content}")
+            content = pathlib.Path(f"{target_folder_path}/{target_content}")
             if is_file_path(content):
                 log_file.write(delete_file(content))
             if is_folder_path(content):
@@ -187,7 +202,7 @@ def synchronize(source_folder_path, target_folder_path):
     for content in source_content_iterator:
         # if next content in a source folder is a file
         if is_file(content):
-            target_path = pathlib.Path(f"{target_folder_path}\\{content.name}")
+            target_path = pathlib.Path(f"{target_folder_path}/{content.name}")
             # if there are same names of the files, check if they are the same
             if content.name in target_content_list:
                 content_path = pathlib.Path(content.path)
@@ -204,13 +219,13 @@ def synchronize(source_folder_path, target_folder_path):
             if content.name in target_content_list:
                 # check if that folder in source-folder has any content, if yes
                 if len(make_content_list(content_path)) > 0\
-                        or len(make_content_list(pathlib.Path(f"{target_folder_path}\\{content.name}"))) > 0:
+                        or len(make_content_list(pathlib.Path(f"{target_folder_path}/{content.name}"))) > 0:
                     #do recursion
-                    synchronize(content_path, pathlib.Path(f"{target_folder_path}\\{content.name}"))
+                    synchronize(content_path, pathlib.Path(f"{target_folder_path}/{content.name}"))
             # if no just copy the folder
             else:
                 log_file.write(copy_folder(content_path,
-                                           pathlib.Path(f"{target_folder_path}\\{content.name}")))
+                                           pathlib.Path(f"{target_folder_path}/{content.name}")))
     return
 
 def main():
