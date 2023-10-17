@@ -40,9 +40,8 @@ def replace_file(source_path, target_path):
     try:
         os.replace(source_path, target_path)
         message = f"{datetime.now()}: Replaced file '{target_path.name}'."
-        log_file.write(f"{message}\n")
         print(message)
-        return True
+        return message
     except OSError as exc:
         print(exc)
 
@@ -54,8 +53,8 @@ def delete_file(target_path):
     try:
         os.remove(target_path)
         message = f"{datetime.now()}: Removed file '{target_path.name}' from '{target_path}'."
-        log_file.write(f"{message}\n")
         print(message)
+        return message
     except OSError as exc:
         print(exc)
 
@@ -67,8 +66,8 @@ def delete_folder(target_path):
     try:
         shutil.rmtree(target_path)
         message = f"{datetime.now()}: Removed folder '{os.path.basename(target_path)}' from '{target_path}'."
-        log_file.write(f"{message}\n")
         print(message)
+        return message
     except IOError as e:
         print(e)
 
@@ -80,8 +79,8 @@ def copy_file(source_path, target_path):
     try:
         shutil.copy2(source_path, target_path)
         message = f"{datetime.now()}: Copied file '{source_path}' -> '{target_path}'."
-        log_file.write(f"{message}\n")
         print(message)
+        return message
     except IOError as e:
         print(e)
 
@@ -93,8 +92,8 @@ def copy_folder(source_path, target_path):
     try:
         shutil.copytree(source_path, target_path)
         message = f"{datetime.now()}: Copied folder '{source_path}' -> '{target_path}'."
-        log_file.write(f"{message}\n")
         print(message)
+        return message
     except IOError as e:
         print(e)
 
@@ -165,9 +164,9 @@ def delete_files_not_in_source(target_content_list, source_content_list, target_
         if target_content not in source_content_list:
             content = pathlib.Path(f"{target_folder_path}\\{target_content}")
             if is_file_path(content):
-                delete_file(content)
+                log_file.write(delete_file(content))
             if is_folder_path(content):
-                delete_folder(content)
+                log_file.write(delete_folder(content))
 
 
 """
@@ -188,24 +187,27 @@ def synchronize(source_folder_path, target_folder_path):
             target_path = pathlib.Path(f"{target_folder_path}\\{content.name}")
             # if there are same names of the files, check if they are the same
             if content.name in target_content_list:
+                content_path = pathlib.Path(content.path)
                 # if they are not the same, replace the file in target folder by file from the source folder
-                if not is_same(content.path, target_path):
-                    replace_file(content.path, target_path)
+                if not is_same(content_path, target_path):
+                    log_file.write(replace_file(content_path, target_path))
             # if there are no same names of the files in both folders, copy the file into the target-folder
             else:
-                copy_file(content.path, target_path)
+                log_file.write(copy_file(content.path, target_path))
         # if next content in a source folder is a folder
         if is_folder(content):
+            content_path = pathlib.Path(content.path)
             # if there are the same folder names in both folders
             if content.name in target_content_list:
                 # check if that folder in source-folder has any content, if yes
-                if len(make_content_list(content.path)) > 0\
+                if len(make_content_list(content_path)) > 0\
                         or len(make_content_list(pathlib.Path(f"{target_folder_path}\\{content.name}"))) > 0:
                     #do recursion
-                    synchronize(content.path, pathlib.Path(f"{target_folder_path}\\{content.name}"))
+                    synchronize(content_path, pathlib.Path(f"{target_folder_path}\\{content.name}"))
             # if no just copy the folder
             else:
-                copy_folder(content.path, pathlib.Path(f"{target_folder_path}\\{content.name}"))
+                log_file.write(copy_folder(content_path,
+                                           pathlib.Path(f"{target_folder_path}\\{content.name}")))
     return
 
 def main():

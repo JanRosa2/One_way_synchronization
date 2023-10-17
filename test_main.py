@@ -1,3 +1,6 @@
+from datetime import  datetime
+import tempfile
+
 import main
 import os
 import pathlib
@@ -6,7 +9,7 @@ import pytest
 def test_make_content_iterator(tmp_path):
     temp_dir_path = tmp_path / "test"
     temp_dir_path.mkdir()
-    file_path = pathlib.Path(temp_dir_path / "hello.txt")
+    file_path = pathlib.Path.joinpath(temp_dir_path, "hello.txt")
     with open(file_path, 'a') as file:
         file.write("hello")
     iterator = main.make_content_iterator(temp_dir_path)
@@ -24,9 +27,9 @@ def test_make_content_iterator_path_not_exists():
         assert exc.value is f"Path cannot be found."
 
 def test_make_content_list(tmp_path):
-    temp_dir_path = pathlib.Path(tmp_path / "test")
+    temp_dir_path = tmp_path / "test"
     temp_dir_path.mkdir()
-    file_path = pathlib.Path(temp_dir_path / "hello.txt")
+    file_path = temp_dir_path / "hello.txt"
     with open(file_path, 'a') as file:
         file.write("hello")
     content_list = main.make_content_list(temp_dir_path)
@@ -43,19 +46,36 @@ def test_make_content_list_path_not_exists():
         assert exc.value is f"Path cannot be found."
 
 def test_replace_file_wrong_input():
-    main.replace_file(pathlib.Path("/adadadad/file1"),pathlib.Path("/adadadad/file1"))
+    main.replace_file(pathlib.Path("/adadadad/file1"), pathlib.Path("/adadadad/file1"))
     pytest.raises(OSError)
 
 def test_replace_file(tmp_path):
-    temp_dir_path1 = tmp_path / "test1"
-    temp_dir_path2 = tmp_path / "test2"
-    temp_dir_path1.mkdir()
-    temp_dir_path2.mkdir()
-    file_path1 = pathlib.Path(temp_dir_path1 / "hello.txt")
+    my_path1 = tmp_path / "mytest1"
+    my_path1.mkdir()
+    file_path1 = my_path1 / "hello.txt"
     with open(file_path1, 'a') as file:
         file.write("hello")
-    file_path2 = pathlib.Path(temp_dir_path2 / "hello.txt")
+    my_path2 = tmp_path / "mytest2"
+    my_path2.mkdir()
+    file_path2 = my_path2 / "hello.txt"
     with open(file_path2, 'a') as file:
         file.write("hello")
-    log_file = file_path2 = pathlib.Path(temp_dir_path2 / "txt.txt")
     main.replace_file(file_path1, file_path2)
+    assert f"{datetime.now()}: Replaced file '{file_path2.name}'."
+
+def test_delete_file_wrong_input():
+    main.delete_file(pathlib.Path("/adadadad/file1"))
+    pytest.raises(OSError)
+
+    main.delete_file(10)
+    pytest.raises(OSError)
+
+def test_delete_file(tmp_path):
+    my_path1 = tmp_path / "mytest1"
+    my_path1.mkdir()
+    file_path1 = my_path1 / "hello.txt"
+    with open(file_path1, 'a') as file:
+        file.write("hello")
+    main.delete_file(file_path1)
+    assert f"{datetime.now()}: Removed file '{file_path1.name}' from '{file_path1}'."
+
