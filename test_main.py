@@ -67,8 +67,9 @@ def test_delete_file_wrong_input():
     main.delete_file(pathlib.Path("/adadadad/file1"))
     pytest.raises(OSError)
 
+def test_delete_file_wrong_input_2():
     main.delete_file(10)
-    pytest.raises(OSError)
+    pytest.raises(TypeError)
 
 def test_delete_file(tmp_path):
     my_path1 = tmp_path / "mytest1"

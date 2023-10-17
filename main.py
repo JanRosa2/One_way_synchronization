@@ -63,13 +63,16 @@ def delete_file(target_path):
 This function deletes a folder from the given path.
 """
 def delete_folder(target_path):
-    try:
-        shutil.rmtree(target_path)
-        message = f"{datetime.now()}: Removed folder '{os.path.basename(target_path)}' from '{target_path}'."
-        print(message)
-        return message
-    except IOError as e:
-        print(e)
+    if isinstance(target_path, pathlib.Path):
+        try:
+            shutil.rmtree(target_path)
+            message = f"{datetime.now()}: Removed folder '{os.path.basename(target_path)}' from '{target_path}'."
+            print(message)
+            return message
+        except IOError as e:
+            print(e)
+    else:
+        raise TypeError(f"Argument has to be Path object.")
 
 
 """
