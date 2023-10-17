@@ -1,3 +1,4 @@
+import filecmp
 import os
 import sys
 import shutil
@@ -25,7 +26,7 @@ This function returns a content of a folder as a list of content names.
 def make_content_list(path_folder):
     if isinstance(path_folder, pathlib.Path):
         if not os.path.exists(path_folder):
-            raise ValueError(f"Path cannot be found.")
+            raise ValueError("Path cannot be found.")
         else:
             array = os.listdir(path_folder)
             return array
@@ -86,7 +87,7 @@ def delete_folder(target_path):
 This function copies a file from a source-folder to a target-folder.
 """
 def copy_file(source_path, target_path):
-    if isinstance(target_path, pathlib.Path):
+    if isinstance(source_path, pathlib.Path) and isinstance(target_path, pathlib.Path):
         try:
             shutil.copy2(source_path, target_path)
             message = f"{datetime.now()}: Copied file '{source_path}' -> '{target_path}'."
@@ -137,23 +138,23 @@ def is_folder(content):
 
 
 """
-This function checks if a string object is a file.
+This function checks if a Path object is a file.
 """
 def is_file_path(content_path):
     if isinstance(content_path, pathlib.Path):
         return os.path.isfile(content_path)
     else:
-        raise TypeError(f"Argument has to be Path object.")
+        raise TypeError("Argument has to be Path object.")
 
 
 """
-This function checks if a string object is a folder.
+This function checks if a Path object is a folder.
 """
 def is_folder_path(content_path):
     if isinstance(content_path, pathlib.Path):
         return os.path.isdir(content_path)
     else:
-        raise TypeError(f"Argument has to be Path object.")
+        raise TypeError("Argument has to be Path object.")
 
 
 """
@@ -161,17 +162,13 @@ This function checks if files at the path1 and the path2 have same time of creat
 It returns True if yes, False if not.
 """
 def is_same(path1, path2):
-    if isinstance(path1, (str, pathlib.Path)) and isinstance(path2, (str, pathlib.Path)):
-        if pathlib.Path(path1).exists() and pathlib.Path(path2).exists():
-            source_time_creation = pathlib.Path(path1).stat().st_mtime_ns
-            target_time_creation = pathlib.Path(path2).stat().st_mtime_ns
-            if source_time_creation == target_time_creation:
-                return True
-            return False
+    if isinstance(path1, pathlib.Path) and isinstance(path2, pathlib.Path):
+        if path1.exists() and path2.exists():
+            return filecmp.cmp(path1, path2)
         else:
             raise ValueError("Path does not exist.")
     else:
-        raise TypeError("Path has to be Path object.")
+        raise TypeError("Arguments have to be Path objects.")
 
 
 """
