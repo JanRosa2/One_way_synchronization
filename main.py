@@ -187,42 +187,42 @@ def delete_files_not_in_source(target_content_list, source_content_list, target_
 """
 This is the main function implementing the one way synchronization of two folders.
 """
-def synchronize(source_folder_path, target_folder_path):
+def synchronize(source_path, target_path):
     # Create an iterator of source-folder content (DirEntry objects)
-    source_content_iterator = make_content_iterator(source_folder_path)
+    source_content_iterator = make_content_iterator(source_path)
     # Create lists of content for both source-folder and target-folder
-    source_content_list = make_content_list(source_folder_path)
-    target_content_list = make_content_list(target_folder_path)
+    source_content_list = make_content_list(source_path)
+    target_content_list = make_content_list(target_path)
     # 1. Delete files from the target folder that are not in the source folder
-    delete_files_not_in_source(target_content_list, source_content_list, target_folder_path)
+    delete_files_not_in_source(target_content_list, source_content_list, target_path)
     # 2. Replace or copy files from the source folder to the target folder
-    for content in source_content_iterator:
+    for source_content in source_content_iterator:
         # if next content in a source folder is a file
-        if is_file(content):
-            target_path = pathlib.Path(f"{target_folder_path}/{content.name}")
-            # if there are same names of the files, check if they are the same
-            if content.name in target_content_list:
-                content_path = pathlib.Path(content.path)
-                # if they are not the same, replace the file in target folder by file from the source folder
-                if not is_same(content_path, target_path):
-                    log_file.write(replace_file(content_path, target_path))
-            # if there are no same names of the files in both folders, copy the file into the target-folder
+        if is_file(source_content):
+            source_file_path = pathlib.Path(source_content.path)
+            target_file_path = target_path.joinpath(source_content.name)
+            # if there are same names of the files, check if those files are the same
+            if source_content.name in target_content_list:
+                # if they are not the same, replace the file in target folder with file from the source folder
+                if not is_same(source_file_path, target_file_path):
+                    log_file.write(copy_file(source_file_path, target_file_path))
+            # if there is no same name of the file, copy the file into the target-folder
             else:
-                log_file.write(copy_file(content.path, target_path))
+                log_file.write(copy_file(source_file_path, target_file_path))
         # if next content in a source folder is a folder
-        if is_folder(content):
-            content_path = pathlib.Path(content.path)
+        if is_folder(source_content):
+            target_fd_path = target_path.joinpath(source_content.name)
+            source_fd_path = pathlib.Path(source_content.path)
             # if there are the same folder names in both folders
-            if content.name in target_content_list:
+            if source_content.name in target_content_list:
                 # check if that folder in source-folder has any content, if yes
-                if len(make_content_list(content_path)) > 0\
-                        or len(make_content_list(pathlib.Path(f"{target_folder_path}/{content.name}"))) > 0:
+                if len(make_content_list(source_fd_path)) > 0\
+                        or len(make_content_list(target_fd_path)) > 0:
                     #do recursion
-                    synchronize(content_path, pathlib.Path(f"{target_folder_path}/{content.name}"))
+                    synchronize(source_fd_path, target_fd_path)
             # if no just copy the folder
             else:
-                log_file.write(copy_folder(content_path,
-                                           pathlib.Path(f"{target_folder_path}/{content.name}")))
+                log_file.write(copy_folder(source_fd_path, target_fd_path))
     return
 
 def main():
