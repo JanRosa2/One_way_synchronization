@@ -4,7 +4,6 @@ import os
 import pathlib
 import pytest
 
-
 def test_make_content_iterator(tmp_path):
     temp_dir_path = tmp_path / "test"
     temp_dir_path.mkdir()
