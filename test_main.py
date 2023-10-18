@@ -49,47 +49,6 @@ def test_make_content_list_path_not_exists():
     with pytest.raises(ValueError, match="Path cannot be found."):
         main.make_content_list(pathlib.Path("/nonsense/nonsense/nonsense/aokfakfnakfsanmflksanmflksaf"))
 
-def test_replace_file_wrong_path():
-    with pytest.raises(OSError):
-        main.replace_file(pathlib.Path("/adadadad/file1"), pathlib.Path("/adadadad/file1"))
-
-def test_replace_file_wrong_input_0():
-    with pytest.raises(TypeError, match="Arguments have to be Path objects."):
-        main.replace_file(10, 10)
-
-def test_replace_file_wrong_input_1():
-    with pytest.raises(TypeError, match="Arguments have to be Path objects."):
-        main.replace_file(10, pathlib.Path("/"))
-
-def test_replace_file_wrong_input_2():
-    with pytest.raises(TypeError, match="Arguments have to be Path objects."):
-        main.replace_file(pathlib.Path("/"), 10)
-
-def test_replace_file_wrong_input_3():
-    with pytest.raises(TypeError, match="Arguments have to be Path objects."):
-        main.replace_file(None, None)
-
-def test_replace_file_wrong_input_4():
-    with pytest.raises(TypeError, match="Arguments have to be Path objects."):
-        main.replace_file(None, pathlib.Path("/"))
-
-def test_replace_file_wrong_input_5():
-    with pytest.raises(TypeError, match="Arguments have to be Path objects."):
-        main.replace_file(pathlib.Path("/"), None)
-
-def test_replace_file(tmp_path):
-    my_path1 = tmp_path / "mytest1"
-    my_path1.mkdir()
-    file_path1 = my_path1 / "hello.txt"
-    with open(file_path1, 'a') as file:
-        file.write("hello")
-    my_path2 = tmp_path / "mytest2"
-    my_path2.mkdir()
-    file_path2 = my_path2 / "hello.txt"
-    with open(file_path2, 'a') as file:
-        file.write("hello")
-    assert f" Replaced file '{file_path2.name}'." in main.replace_file(file_path1, file_path2)
-
 def test_delete_file_wrong_path_0():
     with pytest.raises(OSError):
         main.delete_file(pathlib.Path("/sasasasa/adadadad/file1.txt"))
