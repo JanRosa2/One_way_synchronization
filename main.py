@@ -35,22 +35,6 @@ def make_content_list(path_folder):
 
 
 """
-This function replaces a target-folder file with a source-folder file.
-"""
-def replace_file(source_path, target_path):
-    if isinstance(source_path, pathlib.Path) and isinstance(target_path, pathlib.Path):
-        try:
-            os.replace(source_path, target_path)
-            message = f"{datetime.now()}: Replaced file '{target_path.name}'."
-            print(message)
-            return message
-        except OSError:
-            raise
-    else:
-        raise TypeError("Arguments have to be Path objects.")
-
-
-"""
 This funtion deletes a file from the given path.
 """
 def delete_file(target_path):
@@ -243,8 +227,5 @@ def main():
 
 
 if __name__ == '__main__':
-    try:
-        with open(file=sys.argv[4], mode='a') as log_file:
-            main()
-    except OSError:
-        print("Log file has not been found.")
+    with open(file=sys.argv[4], mode='a') as log_file:
+        main()
