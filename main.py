@@ -16,6 +16,7 @@ def make_content_iterator(path_folder):
             return iterator
         except IOError as exc:
             print(exc)
+            raise
     else:
         raise TypeError("Path has to be Path object.")
 
@@ -118,7 +119,7 @@ def is_folder(content):
     if isinstance(content, os.DirEntry):
         return os.DirEntry.is_dir(content)
     else:
-        raise TypeError(f"Argument has to be DirEntry object.")
+        raise TypeError("Argument has to be DirEntry object.")
 
 
 """
@@ -195,8 +196,8 @@ def synchronize(source_path, target_path):
                 log_file.write(copy_file(source_file_path, target_file_path))
         # if next content in a source folder is a folder
         if is_folder(source_content):
-            target_fd_path = target_path.joinpath(source_content.name)
             source_fd_path = pathlib.Path(source_content.path)
+            target_fd_path = target_path.joinpath(source_content.name)
             # if there are the same folder names in both folders
             if source_content.name in target_content_list:
                 # check if that folder in source-folder has any content, if yes
